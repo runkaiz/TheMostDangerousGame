@@ -11,19 +11,19 @@ local msg = ""
 
 local story = nil
 
-local flag = true
-local position = 0
-local textPosition = 0
+local position = 1
+local textPosition = 1
 
-local currentDialog = null
+local processedDialogCache = {}
 
 local isIndicatorActive = false
 
--- 0 indicates the game is showing text
--- 1 indicates the game is showing choices
+-- 0 indicates the game is in story state
+-- 1 indicates the game is in decision state
+-- 2 indicates the game is in linear state
 local gameState = 0
 
-function createIndicator()
+local function createIndicator()
     local s = gfx.sprite.new()
     s.frame = 1
     local img = gfx.image.new("images/Indicator/" .. s.frame)
@@ -62,26 +62,59 @@ local function processDialog(dialog)
     size = string.len(dialog)
 
     if size / allowedLength >= 1 then
-        for i = 0, math.ceil(size / allowedLength), 1 do
+        for i = 1, math.ceil(size / allowedLength), 1 do
             if i * math.ceil(size / allowedLength) < size then
-                processed[i] = playdate.string.trimWhitespace(string.sub(dialog, i * allowedLength,
-                    (i + 1) * allowedLength))
+                processed[i] = playdate.string.trimWhitespace(string.sub(dialog, (i - 1) * allowedLength,
+                    (i) * allowedLength))
             else
-                processed[i] = playdate.string.trimWhitespace(string.sub(dialog, i * allowedLength, size - 1))
+                processed[i] = playdate.string.trimWhitespace(string.sub(dialog, (i - 1) * allowedLength, size))
             end
         end
     else
-        processed[0] = playdate.string.trimWhitespace(dialog)
+        processed[1] = playdate.string.trimWhitespace(dialog)
     end
 
     return processed, size
+end
+
+local function displayOptions(options)
+    gfx.drawTextInRect("A - " .. options[1].text, 20, 150, 300, 40)
+    gfx.drawTextInRect("B - " .. options[2].text, 20, 200, 300, 40)
+
+    if playdate.buttonJustPressed(playdate.kButtonA) then
+        position = options[1].nextnode
+        textPosition = 1
+        gameState = 0
+
+        return
+    end
+
+    if playdate.buttonJustPressed(playdate.kButtonB) then
+        position = options[2].nextnode
+        textPosition = 1
+        gameState = 0
+
+        return
+    end
+end
+
+local function displayLinearOption(option)
+    gfx.drawTextInRect("A - " .. option, 20, 180, 300, 60)
+
+    if playdate.buttonJustPressed(playdate.kButtonA) then
+        position = story[position].nextnode
+        textPosition = 1
+        gameState = 0
+        return
+    end
 end
 
 local function initialize()
     playdate.display.setRefreshRate(15)
     msg = "Hello World"
     story = original
-    position = 0
+    position = 1
+    processedDialogCache = {}
     gameState = 0
 end
 
@@ -91,11 +124,14 @@ function playdate.update()
     gfx.sprite.update()
 
     if gameState == 0 then
-        currentDialog = processDialog(story[position].textbody)
-        msg = currentDialog[textPosition]
+        if processedDialogCache[position] == nil then
+            processedDialogCache[position] = processDialog(story[position].textbody)
+        end
 
-        local dialogSize = #(currentDialog)
-        local truncated = textPosition < dialogSize - 1
+        msg = processedDialogCache[position][textPosition]
+
+        local dialogSize = #(processedDialogCache[position])
+        local truncated = textPosition < dialogSize
 
         if not isIndicatorActive and truncated then
             createIndicator()
@@ -108,17 +144,32 @@ function playdate.update()
         if playdate.buttonJustPressed(playdate.kButtonA) then
             if truncated then
                 textPosition += 1
-            else if textPosition == dialogSize - 1 then
-                    gameState = 1
+            else if textPosition == dialogSize then
+                    if story[position].options ~= nil then
+                        gameState = 1
+                    else
+                        gameState = 2
+                    end
                 end
             end
         end
 
-        if playdate.buttonJustPressed(playdate.kButtonB) and textPosition > 0 then
+        if playdate.buttonJustPressed(playdate.kButtonB) and textPosition > 1 then
             textPosition -= 1
         end
-    else if gameState == 1 then
+    elseif gameState == 1 then
+        if story[position].optionbody ~= nil then
             msg = story[position].optionbody
+            displayOptions(story[position].options)
+        else
+            msg = "Game Over"
+        end
+    elseif gameState == 2 then
+        if story[position].option ~= nil then
+            msg = ""
+            displayLinearOption(story[position].option)
+        else
+            msg = "Game Over"
         end
     end
 
