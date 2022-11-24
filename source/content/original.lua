@@ -57,6 +57,33 @@ original = {
         option = "Moving On -- The Next Day",
         nextnode = 11313
     },
+    [11313] = {
+        textbody = "(The next day…)\nYou heard the hounds again; they are coming back for you! You were exhausted and you need to think quick and act now! What would you do?",
+        optionbody = "Would you rather Stay and fight with the knife issued to you, Flee, or Execute the Wildest Idea that You'll even have in your life?",
+        options = {
+            [1] = {
+                text = "Stay and fight with the knife issued to you",
+                nextnode = 113131
+            },
+            [2] = {
+                text = "Flee",
+                nextnode = 113132
+            },
+            [3] = {
+                text = "Execute the Wildest Idea that You'll even have in your life",
+                nextnode = 113133
+            }
+        },
+    },
+    [113131] = {
+
+    },
+    [113132] = {
+        textbody = "You fled from the scene; you ran as fast as you can. However, the hounds were faster than you are. They bit you on the way and you were badly hurt. Still, you continued to run for your life.\nGeneral Zaroff raised his .22 pistol and aimed it at you. There was no escape.\n\n\"Boom\"\n\nYou were shot in the stomach and you fell to your knees. General Zaroff followed his hounds and sat next to you. \"My friend,\" he said, \"You lost the game, and your penalty is death!\"\nThe dogs leaped on you and started to tear pieces of flesh off of your body. You screamed and begged for mercy, but it was useless.\n\nYou died!"
+    },
+    [113133] = {
+
+    },
     [12] = {
         textbody = "You had decided not to go in the chateau, you looked around for food.In the forest, you saw a strong man, manybe a giant, with three \"bloodhounds\" by his side. His body is covered with blood, but since the man was not so far away, but still, you cannot see his facial expression. In addition, a name tag saying General Zaroff was printed on his shirt.",
         optionbody = "What would you do? You could:",

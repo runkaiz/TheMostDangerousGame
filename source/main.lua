@@ -15,6 +15,7 @@ local position = 1
 
 local isIndicatorActive = false
 
+local enableScrolling = true
 local offset = 0
 
 -- 0 indicates the game is in story state
@@ -66,6 +67,7 @@ local function displayOptions(options)
         position = options[1].nextnode
         textPosition = 1
         gameState = 0
+        offset = 0
 
         return
     end
@@ -74,17 +76,23 @@ local function displayOptions(options)
         position = options[2].nextnode
         textPosition = 1
         gameState = 0
+        offset = 0
 
         return
     end
 end
 
 local function displayLinearOption(option)
-    gfx.drawTextInRect("A - " .. option, 20, 180, 300, 60)
+    w, h = gfx.getTextSizeForMaxWidth("A - " .. option, 360)
+    gfx.drawTextInRect("A - " .. option, 20, 180, w, h)
+    enableScrolling = false
 
     if playdate.buttonJustPressed(playdate.kButtonA) then
         position = story[position].nextnode
         gameState = 0
+        offset = 0
+        enableScrolling = true
+
         return
     end
 end
@@ -135,12 +143,16 @@ function playdate.update()
         end
     end
 
-    offset -= playdate.getCrankChange()
-    
-    w, h = gfx.getTextSizeForMaxWidth(msg, 360)
-    offset = math.clamp(offset, (-1 * h) - 40, 0)
+    if enableScrolling then
+        offset -= playdate.getCrankChange()
+        w, h = gfx.getTextSizeForMaxWidth(msg, 360)
+        offset = math.clamp(offset, (-1 * h) + 180, 0)
 
-    playdate.graphics.setDrawOffset(0, offset)
+        playdate.graphics.setDrawOffset(0, offset)
+    else
+        playdate.graphics.setDrawOffset(0, 0)
+    end
+
     gfx.drawTextInRect(msg, 20, 20, w, h)
 
     playdate.drawFPS(2, 224)
