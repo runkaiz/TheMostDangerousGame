@@ -60,8 +60,14 @@ local function createIndicator(h)
 end
 
 local function displayOptions(options)
-    gfx.drawTextInRect("A - " .. options[1].text, 20, 150, 300, 40)
-    gfx.drawTextInRect("B - " .. options[2].text, 20, 200, 300, 40)
+    optionOffset = 0
+    if #(options) == 3 then
+        optionOffset = 50
+        gfx.drawTextInRect("C - " .. options[3].text, 20, 200, 300, 40)
+    end
+
+    gfx.drawTextInRect("A - " .. options[1].text, 20, 150 - optionOffset, 300, 40)
+    gfx.drawTextInRect("B - " .. options[2].text, 20, 200 - optionOffset, 300, 40)
 
     if playdate.buttonJustPressed(playdate.kButtonA) then
         position = options[1].nextnode
@@ -74,6 +80,15 @@ local function displayOptions(options)
 
     if playdate.buttonJustPressed(playdate.kButtonB) then
         position = options[2].nextnode
+        textPosition = 1
+        gameState = 0
+        offset = 0
+
+        return
+    end
+
+    if playdate.buttonJustPressed(playdate.kButtonDown) then
+        position = options[3].nextnode
         textPosition = 1
         gameState = 0
         offset = 0
