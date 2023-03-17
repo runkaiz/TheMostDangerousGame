@@ -7,6 +7,13 @@ import "/content/original"
 
 local gfx <const> = playdate.graphics
 
+-- Load Media Files
+--local customFont = gfx.font.new("/fonts/FT88-Regular-15")
+--gfx.setFont(customFont)
+
+local dpad = gfx.image.new("images/DPad")
+-- End Load Media Files
+
 local msg = ""
 
 local story = nil
@@ -60,14 +67,26 @@ local function createIndicator(h)
 end
 
 local function displayOptions(options)
-    optionOffset = 0
+    dpad:drawCentered(200, 150)
+
+    local aW, aH = gfx.getTextSizeForMaxWidth(options[1].text, 150)
+    local aY = 150 - (aH / 2)
+
+    local bW, bH = gfx.getTextSizeForMaxWidth(options[2].text, 150)
+    local bX = 170 - bW
+    local bY = 150 - (bH / 2)
+
     if #(options) == 3 then
-        optionOffset = 50
-        gfx.drawTextInRect("C - " .. options[3].text, 20, 200, 300, 40)
+        local cW, cH = gfx.getTextSizeForMaxWidth(options[3].text, 380)
+        gfx.drawRect(200 - (cW / 2), 180, cW, cH)
+        gfx.drawTextInRect(options[3].text, 200 - (cW / 2), 180, cW, cH, nil, nil, kTextAlignment.center)
     end
 
-    gfx.drawTextInRect("A - " .. options[1].text, 20, 150 - optionOffset, 300, 40)
-    gfx.drawTextInRect("B - " .. options[2].text, 20, 200 - optionOffset, 300, 40)
+    gfx.drawRect(230, aY, aW, aH)
+    gfx.drawTextInRect(options[1].text, 230, aY, aW, aH, nil, nil, kTextAlignment.left)
+
+    gfx.drawRect(bX, bY, bW, bH)
+    gfx.drawTextInRect(options[2].text, bX, bY, bW, bH, nil, nil, kTextAlignment.right)
 
     if playdate.buttonJustPressed(playdate.kButtonA) then
         position = options[1].nextnode
@@ -98,7 +117,7 @@ local function displayOptions(options)
 end
 
 local function displayLinearOption(option)
-    w, h = gfx.getTextSizeForMaxWidth("A - " .. option, 360)
+    local w, h = gfx.getTextSizeForMaxWidth("A - " .. option, 360)
     gfx.drawTextInRect("A - " .. option, 20, 180, w, h)
     enableScrolling = false
 
@@ -168,7 +187,7 @@ function playdate.update()
         playdate.graphics.setDrawOffset(0, 0)
     end
 
-    gfx.drawTextInRect(msg, 20, 20, w, h)
+    gfx.drawTextInRect(msg, 20, 10, w, h)
 
     playdate.drawFPS(2, 224)
 end
